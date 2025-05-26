@@ -16,7 +16,7 @@ spring:
             - Path=/specialists/**
           filters:
             - StripPrefix=1
-            - TokenRelay
+            - TokenRelay # para pasar JWT al microservicio
         - id: pacientes-service
           uri: lb://pacientes-service
           predicates:
@@ -24,10 +24,12 @@ spring:
           filters:
             - StripPrefix=1
             - TokenRelay
+
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
+
   config:
     import: optional:configserver:http://config-server:8888
 
