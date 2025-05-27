@@ -30,18 +30,7 @@ spring:
           enabled: true
           lower-case-service-id: true
 
-  config:
-    import: optional:configserver:http://config-server:8888
-
-server:
-  port: 8080
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
+  
 
 resilience4j:
   circuitbreaker:
