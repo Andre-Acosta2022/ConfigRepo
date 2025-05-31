@@ -1,8 +1,17 @@
+server:
+  port: 8089
+
 spring:
   application:
     name: gateway-service
+
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
       routes:
         - id: auth-service
           uri: lb://auth-service
@@ -13,21 +22,10 @@ spring:
               args:
                 name: authCircuitBreaker
                 fallbackUri: forward:/fallback/auth
-
-        - id: appointment-service
-          uri: lb://appointment-service
-          predicates:
-            - Path=/appointments/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: appointmentCircuitBreaker
-                fallbackUri: forward:/fallback/appointments
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
-
         - id: pacientes-service
           uri: lb://pacientes-service
           predicates:
@@ -37,73 +35,86 @@ spring:
               args:
                 name: pacientesCircuitBreaker
                 fallbackUri: forward:/fallback/pacientes
-
-        - id: specialist-service
-          uri: lb://specialist-service
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 15
+                redis-rate-limiter.burstCapacity: 25
+        - id: doctor-service
+          uri: lb://doctor-service
           predicates:
-            - Path=/specialists/**
+            - Path=/doctor/**
           filters:
             - name: CircuitBreaker
               args:
-                name: specialistCircuitBreaker
-                fallbackUri: forward:/fallback/specialists
-
-        - id: incident-service
-          uri: lb://incident-service
+                name: doctorCircuitBreaker
+                fallbackUri: forward:/fallback/doctor
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+        - id: usuarios-service
+          uri: lb://usuarios-service
           predicates:
-            - Path=/incidents/**
+            - Path=/usuarios/**
           filters:
             - name: CircuitBreaker
               args:
-                name: incidentCircuitBreaker
-                fallbackUri: forward:/fallback/incidents
-  
+                name: usuariosCircuitBreaker
+                fallbackUri: forward:/fallback/usuarios
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
 
-resilience4j:
-  circuitbreaker:
-    instances:
-      authCircuitBreaker:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10000
-        permittedNumberOfCallsInHalfOpenState: 3
-      appointmentCircuitBreaker:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10000
-        permittedNumberOfCallsInHalfOpenState: 3
-      pacientesCircuitBreaker:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10000
-        permittedNumberOfCallsInHalfOpenState: 3
-      specialistCircuitBreaker:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10000
-        permittedNumberOfCallsInHalfOpenState: 3
-      incidentCircuitBreaker:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10000
-        permittedNumberOfCallsInHalfOpenState: 3
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak-server:8080/realms/clinic-realm
 
-  ratelimiter:
-    instances:
-      default:
-        limitForPeriod: 100
-        limitRefreshPeriod: 1s
-        timeoutDuration: 3s
+  resilience4j:
+    circuitbreaker:
+      instances:
+        authCircuitBreaker:
+          registerHealthIndicator: true
+          slidingWindowSize: 10
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10000
+        pacientesCircuitBreaker:
+          registerHealthIndicator: true
+          slidingWindowSize: 10
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10000
+        doctorCircuitBreaker:
+          registerHealthIndicator: true
+          slidingWindowSize: 10
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10000
+        usuariosCircuitBreaker:
+          registerHealthIndicator: true
+          slidingWindowSize: 10
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10000
 
 management:
   endpoints:
     web:
       exposure:
-        include: '*'
-  endpoint:
-    health:
-      show-details: always
+        include: health, info, metrics, prometheus
 
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            key-resolver: "#{@ipKeyResolver}"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
