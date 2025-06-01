@@ -7,6 +7,12 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            key-resolver: "#{@ipKeyResolver}"   
 
       routes:
         - id: auth-service
@@ -97,15 +103,7 @@ management:
       exposure:
         include: health, info, metrics, prometheus
 
-spring:
-  cloud:
-    gateway:
-      default-filters:
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter.replenishRate: 10
-            redis-rate-limiter.burstCapacity: 20
-            key-resolver: "#{@ipKeyResolver}"
+  
 
 eureka:
   client:
