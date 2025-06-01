@@ -1,7 +1,66 @@
 spring:
   application:
     name: gateway-service
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
 
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: authCircuitBreaker
+                fallbackUri: forward:/fallback/auth
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+        - id: pacientes-service
+          uri: lb://pacientes-service
+          predicates:
+            - Path=/pacientes/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: pacientesCircuitBreaker
+                fallbackUri: forward:/fallback/pacientes
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 15
+                redis-rate-limiter.burstCapacity: 25
+        - id: doctor-service
+          uri: lb://doctor-service
+          predicates:
+            - Path=/doctor/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: doctorCircuitBreaker
+                fallbackUri: forward:/fallback/doctor
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+        - id: usuarios-service
+          uri: lb://usuarios-service
+          predicates:
+            - Path=/usuarios/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: usuariosCircuitBreaker
+                fallbackUri: forward:/fallback/usuarios
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
   
 eureka:
   client:
