@@ -1,0 +1,75 @@
+server:
+  port: 8087  # El puerto del primer archivo, puedes cambiar a 8088 si prefieres
+
+spring:
+  application:
+    name: pago-service
+  datasource:
+    url: jdbc:mysql://mysql:3306/pago_db?useSSL=false&serverTimezone=UTC  # o jdbc:mysql://localhost:3306/payment_db si quieres usar este
+    username: root
+    password: password  # o 123456 según prefieras
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    show-sql: true
+
+  cloud:
+    config:
+      enabled: false  # según el segundo archivo
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASSWORD:clinica123}
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 30000
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+    instances:
+      citaService:
+        baseConfig: default
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakerevents
+
+eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 30
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+logging:
+  level:
+    feign.Client: DEBUG
+    com.clinic.payment_sv: DEBUG
+
+security:
+  oauth2:
+    resourceserver:
+      jwt:
+        issuer-uri: ${ISSUER_URI}  # Variable de entorno obligatoria
