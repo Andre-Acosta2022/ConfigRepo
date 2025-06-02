@@ -2,8 +2,6 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
-  application:
-    name: ms-pacientes
 
   datasource:
     url: jdbc:mysql://mmysql-pacientes:3306/pacientes_db
