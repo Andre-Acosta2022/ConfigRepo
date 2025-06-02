@@ -5,6 +5,12 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            key-resolver: "#{@ipKeyResolver}"   
 
       routes:
         - id: auth-service
@@ -20,7 +26,6 @@ spring:
               args:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
-
         - id: pacientes-service
           uri: lb://pacientes-service
           predicates:
@@ -34,7 +39,6 @@ spring:
               args:
                 redis-rate-limiter.replenishRate: 15
                 redis-rate-limiter.burstCapacity: 25
-
         - id: doctor-service
           uri: lb://doctor-service
           predicates:
@@ -48,9 +52,61 @@ spring:
               args:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
+        - id: usuarios-service
+          uri: lb://usuarios-service
+          predicates:
+            - Path=/usuarios/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: usuariosCircuitBreaker
+                fallbackUri: forward:/fallback/usuarios
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak-server:8080/realms/clinic-realm
 
+
+  resilience4j:
+    circuitbreaker:
+      instances:
+        authCircuitBreaker:
+          registerHealthIndicator: true
+          slidingWindowSize: 10
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10000
+        pacientesCircuitBreaker:
+          registerHealthIndicator: true
+          slidingWindowSize: 10
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10000
+        doctorCircuitBreaker:
+          registerHealthIndicator: true
+          slidingWindowSize: 10
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10000
+        usuariosCircuitBreaker:
+          registerHealthIndicator: true
+          slidingWindowSize: 10
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10000
+  
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health, info, metrics, prometheus
+
+  
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
