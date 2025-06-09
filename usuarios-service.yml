@@ -6,7 +6,7 @@ spring:
     name: usuarios-service
 
   datasource:
-    url: jdbc:mysql://mysql-usuarios:3306/usuarios_db
+    url: jdbc:mysql://mysql-db:3306/clinic_db
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
