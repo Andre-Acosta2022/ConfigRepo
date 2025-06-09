@@ -17,7 +17,6 @@ keycloak:
   bearer-only: true
   security-constraints:
     - authRoles:
-        - user
         - admin
         - paciente
         - doctor
