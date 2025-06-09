@@ -20,7 +20,7 @@ keycloak:
         - user
         - admin
         - paciente
-        -doctor
+        - doctor
       securityCollections:
         - patterns:
             - /api/*
