@@ -6,11 +6,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/clinic-realm
+          issuer-uri: http://keycloak:8080/realms/clinic-realm
 
 keycloak:
   realm: clinic
-  auth-server-url: http://localhost:8080/auth/
+  auth-server-url: http://keycloak:8080/auth/
   resource: auth-service
   credentials:
     secret: 6rpifPyl7fDhD65gCSpdjq1rCPq9IVwA
