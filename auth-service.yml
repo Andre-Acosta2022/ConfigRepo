@@ -9,20 +9,15 @@ spring:
           issuer-uri: http://keycloak:8080/realms/clinic-realm
 
 keycloak:
-  realm: clinic
-  auth-server-url: http://keycloak:8080/auth/
-  resource: auth-service
+  auth-server-url: http://localhost:8080/realms/clinic-realm 
+  realm: clinic-realm
+  resource: clinic-app
   credentials:
-    secret: 6rpifPyl7fDhD65gCSpdjq1rCPq9IVwA
+    secret: EzQHVZN7v6trjSVNg4rntrizpKVV4PDx
+  public-client: true
   bearer-only: true
-  security-constraints:
-    - authRoles:
-        - admin
-        - paciente
-        - doctor
-      securityCollections:
-        - patterns:
-            - /api/*
+  use-resource-role-mappings: true
+  enable-basic-auth: true
 
 
 management:
