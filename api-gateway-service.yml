@@ -63,7 +63,13 @@ spring:
                 name: doctorCircuitBreaker
                 fallbackUri: forward:/fallback/doctor
             - StripPrefix=1
-
+        - id: rate-limited-route
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
   security:
     oauth2:
       resourceserver:
