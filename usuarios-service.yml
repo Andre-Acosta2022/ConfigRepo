@@ -32,3 +32,10 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
+keycloak:
+  server-url: http://keycloak:8080
+  realm: clinic-realm
+  admin:
+    username: admin-clinic
+    password: Admin123!
+    client-id: admin-cli
