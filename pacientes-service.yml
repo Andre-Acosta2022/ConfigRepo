@@ -1,25 +1,24 @@
 spring:
+  application:
+    name: pacientes-service
   main:
     allow-bean-definition-overriding: true
-
-
   datasource:
     url: jdbc:mysql://mysql-db:3306/clinic_db
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
-    
   security:
-  oauth2:
-    resourceserver:
-      jwt:
-        issuer-uri: http://localhost:8088/realms/clinic-realm/protocol/openid-connect/certs
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/clinic-realm
+
 server:
   port: 8086
 
@@ -34,7 +33,6 @@ resilience4j:
         failureRateThreshold: 50
         waitDurationInOpenState: 10000
         permittedNumberOfCallsInHalfOpenState: 3
-
   timelimiter:
     instances:
       usuariosService:
@@ -64,3 +62,7 @@ management:
   endpoint:
     health:
       show-details: always
+
+
+usuarios-service:
+  url: http://usuarios-service:8090
