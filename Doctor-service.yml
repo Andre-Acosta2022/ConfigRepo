@@ -2,9 +2,9 @@ spring:
   application:
     name: Doctor-service
   datasource:
-    url: jdbc:mysql://mysql-medico:3306/ms-medico
+    url: jdbc:mysql://mysql-db:3306/clinic_db
     username: root
-    password: 12345
+    password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
