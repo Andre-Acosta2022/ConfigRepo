@@ -69,7 +69,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak-server:8080/realms/clinic-realm
+          issuer-uri: http://localhost:8080/realms/clinic-realm
+          jwk-set-uri: http://localhost:8080/realms/clinic-realm/protocol/openid-connect/certs
 
 
   resilience4j:
