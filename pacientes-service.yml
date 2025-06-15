@@ -16,11 +16,10 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     
   security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8088/realms/your-realm/protocol/openid-connect/certs
-
+  oauth2:
+    resourceserver:
+      jwt:
+        issuer-uri: http://localhost:8088/realms/clinic-realm/protocol/openid-connect/certs
 server:
   port: 8086
 
