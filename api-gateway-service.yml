@@ -5,14 +5,8 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
-      default-filters:
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter.replenishRate: 10
-            redis-rate-limiter.burstCapacity: 20
-            key-resolver: "#{@ipKeyResolver}"   
-
       routes:
+        # Auth Service
         - id: auth-service
           uri: lb://auth-service
           predicates:
@@ -22,55 +16,59 @@ spring:
               args:
                 name: authCircuitBreaker
                 fallbackUri: forward:/fallback/auth
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-        - id: pacientes-service
-          uri: lb://pacientes-service
-          predicates:
-            - Path=/pacientes/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: pacientesCircuitBreaker
-                fallbackUri: forward:/fallback/pacientes
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 15
-                redis-rate-limiter.burstCapacity: 25
-        - id: doctor-service
-          uri: lb://doctor-service
-          predicates:
-            - Path=/doctor/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: doctorCircuitBreaker
-                fallbackUri: forward:/fallback/doctor
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
-        - id: usuarios-service
+            - StripPrefix=1
+
+        # Usuarios Service (SIN AUTENTICACIÓN para /crear)
+        - id: usuarios-service-public
           uri: lb://usuarios-service
           predicates:
-            - Path=/usuarios/**
+            - Path=/api/usuarios/crear
           filters:
             - name: CircuitBreaker
               args:
                 name: usuariosCircuitBreaker
                 fallbackUri: forward:/fallback/usuarios
-            - name: RequestRateLimiter
+
+        # Usuarios Service (CON AUTENTICACIÓN)
+        - id: usuarios-service-private
+          uri: lb://usuarios-service
+          predicates:
+            - Path=/api/usuarios/**
+          filters:
+            - name: CircuitBreaker
               args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
+                name: usuariosCircuitBreaker
+                fallbackUri: forward:/fallback/usuarios
+
+        # Pacientes Service
+        - id: pacientes-service
+          uri: lb://pacientes-service
+          predicates:
+            - Path=/api/pacientes/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: pacientesCircuitBreaker
+                fallbackUri: forward:/fallback/pacientes
+            - StripPrefix=1
+
+        # Doctor Service
+        - id: doctor-service
+          uri: lb://doctor-service
+          predicates:
+            - Path=/api/doctores/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: doctorCircuitBreaker
+                fallbackUri: forward:/fallback/doctor
+            - StripPrefix=1
+
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/clinic-realm
-          jwk-set-uri: http://localhost:8080/realms/clinic-realm/protocol/openid-connect/certs
+          issuer-uri: http://keycloak:8080/realms/clinic-realm
 
 
   resilience4j:
